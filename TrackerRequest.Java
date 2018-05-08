@@ -1,48 +1,64 @@
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class TrackerRequest{
 
-	private String infoHash;
-	private String peerId;
-	private int port;
-	private int uploaded;
-	private int downloaded;
-	private int left;
-	private enum compact{0,1};
-	private enum event{"started","stopped","completed"};
-	
-	//optional
-	private String ip;
-	private int numwant;
-	private String key
-	private String trackerId;
+	private String announce;
+	private LinkedHashMap<String,String> payload;
 
-	public void setInfoHash(String infoHash){
-		this.infoHash = infoHash;
+	public TrackerRequest(){
+		this.payload = new LinkedHashMap<String,String>();
+	}
+	public void setAnnounce(String announce){
+		this.announce = announce;
+	}
+	public void add(String key,String value){
+		this.payload.put(key,value);
+	}
+	public String find(String key){
+		return this.payload.get(key);
+	}
+	public void clearPayload(){
+		this.payload.clear();
 	}
 
-	public void setPeerId(String peerId){
-		this.peerId = peerId;
+	public void showPayload(){
+		for(Map.Entry<String, String> entry : this.payload.entrySet()){
+			System.out.printf(entry.getKey(),":",entry.getValue());
+			System.out.printf(":");
+			System.out.println(entry.getValue());
+		}
+	}
+	public String getRequest(){
+		StringBuilder sb = new StringBuilder();
+		if(this.announce==null){
+			return null;
+		}
+		sb.append(this.announce);
+		sb.append("?");
+
+		for(Map.Entry<String, String> entry : this.payload.entrySet()){
+			sb.append(entry.getKey());
+			sb.append("=");
+			sb.append(entry.getValue());
+			sb.append("&");
+		}
+		return sb.toString();
 	}
 
-	public void setPort(int port){
-		this.port = port;
+	@Override
+	public String toString(){
+		return this.getRequest();
 	}
 
-	public void setUploaded(int uploaded){
-		this.uploaded = uploaded;
-	}
-
-	public void setUploaded(int downloaded){
-		this.downloaded = downloaded;
-	}
-
-	public void setLeft(int left){
-		this.left = left;
-	}
-	
-
-	public String getRequest{
-		return ""
+	public static void main(String[] args){
+		TrackerRequest t = new TrackerRequest();
+		t.setAnnounce("google.com");
+		t.add("test","ddd");
+		t.add("temp","www");
+		t.showPayload();
+		System.out.println(t.getRequest());
+		System.out.println(t);
 	}
 }
