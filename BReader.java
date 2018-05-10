@@ -66,8 +66,15 @@ public class BReader {
     private BInt DecodeInt(){
 
         index++;
+
+        String numString="";
+        while((data[index]>='0' && data[index]<='9' )|| data[index]=='-'){
+          numString+= Character.toString((char)data[index]);
+
+          index++;
+        }
         Long out = new Long(parseNum('e'));
-        return new BInt(out);
+        return new BInt(Long.parseLong(numString));
     }
 
     private BList DecodeList(){

@@ -15,7 +15,7 @@ public class Utils{
         {
             md = MessageDigest.getInstance("SHA-1");
             System.out.println(bytesToHex(md.digest(input)));
-            byte [] s= hexStringToByteArray("123456789abcdef123456789abcdef123456789a");
+            byte [] s= hexStringToByteArray("36234f25405fa31127d61c29954a4352e44e8797");
             System.out.println(byteArray2Hex(s));
             return byteArray2Hex(md.digest(input));
             //%124Vx%9a%bc%de%f1%23Eg%89%ab%cd%ef%124Vx%9a
@@ -55,14 +55,14 @@ public class Utils{
 
             if((b>='a'&& b<='z') || (b>='A'&& b<='Z') || (b>='0'&& b<='9') ||(b=='.' || b=='-' || b=='_' || b=='~'))
             {
-                  System.out.println(b);
-                  System.out.println((char)b);
+                  //System.out.println(b);
+                  //System.out.println((char)b);
       
                   if(b=='0'){
-                    System.out.println("-----");
-                    System.out.println((char)b);
-                    System.out.println(b);
-                    System.out.println("-----");
+                    //System.out.println("-----");
+                    //System.out.println((char)b);
+                    //System.out.println(b);
+                    //System.out.println("-----");
                   }
                   int temp = Integer.valueOf(Integer.toString(b), 10);
                  // System.out.println(temp);
@@ -103,4 +103,6 @@ public class Utils{
       return new BigInteger(bytes).intValue();
       
   }
+
+  
 }

@@ -16,7 +16,9 @@ public class BInt implements BElement{
 	}
 	
 	public byte [] bencode(){
+		
 		byte [] digits = lenToBytes(value.toString());
+
 		byte [] output = new byte[digits.length + 2];
 		int index = 0;
 		output[index++]=(byte) 'i';
