@@ -5,7 +5,10 @@ public class BInt implements BElement{
 	private final Long value;
 
 	public BInt(Long n){
+
 		this.value = n;
+		System.out.println(n);
+		System.out.println(this.value);
 	}
 
 	public Long getValue(){

@@ -1,3 +1,4 @@
 *.class
 *.torrent
+*.txt
 .DS_Store

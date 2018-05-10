@@ -135,14 +135,19 @@ public class BReader {
       BReader test = new BReader(temp);
       BElement t = test.Decode()[0];
       System.out.println(t.B_to_String().equals(temp));
-      BReader filereader = new BReader(new File("test.torrent"));
+      BReader filereader = new BReader(new File("KNOPPIX_V7.7.1DVD-2016-10-22-EN.torrent"));
       BDict dict = (BDict) filereader.Decode()[0];
       BString c = new BString("info");
       BDict info = (BDict) dict.find(c);
+      try (FileOutputStream fos = new FileOutputStream("turd.torrent")) {
+         fos.write(info.bencode());
+         //fos.close(); There is no more need for this line since you had created the instance of "fos" inside the try. And this will automatically close the OutputStream
+      }
       BString piece = (BString) info.find(new BString("pieces"));
       System.out.println(piece.getData().length%4);
-      String encoded = new String(dict.bencode());
-      System.out.println(encoded);
+     // String encoded = new String(info.bencode());
+      //System.out.println(encoded);
+      
 
     }
 

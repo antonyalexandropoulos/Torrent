@@ -44,6 +44,7 @@ public class TrackerRequest{
 			sb.append(entry.getValue());
 			sb.append("&");
 		}
+		sb.setLength(sb.length()-1);
 		return sb.toString();
 	}
 
@@ -54,7 +55,7 @@ public class TrackerRequest{
 
 	public static void main(String[] args){
 		TrackerRequest t = new TrackerRequest();
-		t.setAnnounce("google.com");
+		t.setAnnounce("http://google.com");
 		t.add("test","ddd");
 		t.add("temp","www");
 		t.showPayload();

@@ -5,8 +5,14 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Iterator;
 
+
 import java.io.File;
 import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.Path;
 
 
 public class TorrentParser{
@@ -28,13 +34,19 @@ public class TorrentParser{
 		System.out.println(info.find(new BString("piece length")));
 		
 		//Main dictionary
+		
+	
+		
+
 		torrent.setInfoHash(Utils.SHAsum(info.bencode()));
 		torrent.setAnnounce(parseByteString("announce",dictionary));
 		torrent.setName(parseByteString("name",dictionary));
 		torrent.setCreatedBy(parseByteString("created by",dictionary));
 		torrent.setComment(parseByteString("comment",dictionary)); 
 		torrent.setCreationDate(parseLong("creation date",dictionary));
-		
+		System.out.println("ehehehe");
+		System.out.println(torrent.getInfoHash());
+		System.out.println(Utils.SHAsum(info.bencode()));
 		//Info dictionary
 		torrent.setPieceLength(parseLong("piece length",info));
 		torrent.setPieceData(parseByteString("pieces",info).getBytes());
