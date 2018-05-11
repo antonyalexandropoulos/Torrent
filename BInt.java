@@ -7,8 +7,6 @@ public class BInt implements BElement{
 	public BInt(Long n){
 
 		this.value = n;
-		System.out.println(n);
-		System.out.println(this.value);
 	}
 
 	public Long getValue(){
@@ -16,7 +14,7 @@ public class BInt implements BElement{
 	}
 	
 	public byte [] bencode(){
-		
+
 		byte [] digits = lenToBytes(value.toString());
 
 		byte [] output = new byte[digits.length + 2];

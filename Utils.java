@@ -14,9 +14,9 @@ public class Utils{
         try
         {
             md = MessageDigest.getInstance("SHA-1");
-            System.out.println(bytesToHex(md.digest(input)));
-            byte [] s= hexStringToByteArray("36234f25405fa31127d61c29954a4352e44e8797");
-            System.out.println(byteArray2Hex(s));
+            //System.out.println(bytesToHex(md.digest(input)));
+            //byte [] s= hexStringToByteArray("36234f25405fa31127d61c29954a4352e44e8797");
+            //System.out.println(byteArray2Hex(s));
             return byteArray2Hex(md.digest(input));
             //%124Vx%9a%bc%de%f1%23Eg%89%ab%cd%ef%124Vx%9a
            // %124Vx%9A%BC%DE%F1%23Eg%89%AB%CD%EF%124Vx%9A
@@ -98,9 +98,10 @@ public class Utils{
       for(int i=0;i<bytes.length;++i){
         bue = (bue<<8) | bytes[i];
       }
-
+  
       return bue;*/
-      return new BigInteger(bytes).intValue();
+      // return new BigInteger(bytes).intValue();
+      return (bytes[0] & 0xFF) << 8 | (bytes[1] & 0xFF);
       
   }
 

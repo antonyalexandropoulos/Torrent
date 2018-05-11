@@ -25,6 +25,10 @@ public class BReader {
     public BReader(String s){
         data = s.getBytes();
     }
+
+    public BReader(byte[] data){
+        this.data = data;
+    }
    
     public BElement[] Decode(){
         final ArrayList<BElement> items= new ArrayList<>();

@@ -47,21 +47,32 @@ public class TrackerRequestHandler{
 		URL test = new URL(createRequest().getRequest());
 		HttpURLConnection conn = (HttpURLConnection)test.openConnection();
 		conn.setRequestMethod("GET");
-		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-		String inputLine;
-		while((inputLine=in.readLine())!=null)
-			System.out.println(inputLine);
-		in.close(); 
-		System.out.println(test);
-		return this.response;
+		InputStream t = conn.getInputStream();
+
+		byte[] buffer = new byte[8192];
+	    int bytesRead;
+	    ByteArrayOutputStream output = new ByteArrayOutputStream();
+	    while ((bytesRead = t.read(buffer)) != -1)
+	    {
+	        output.write(buffer, 0, bytesRead);
+	    }
+	    byte [] blob =  output.toByteArray();
+	    t.close();
+
+		TrackerResponseParser reader = new TrackerResponseParser();
+		return reader.parseResponse(blob);
 	}
 
 	public static void main(String[] args) throws IOException{
 		
 		TorrentParser test = new TorrentParser();
-		Torrent t = test.parseTorrent("t741721 (1).torrent");
+		Torrent t = test.parseTorrent("ubuntustudio-18.04-dvd-amd64.iso.torrent");
 		TrackerRequestHandler handler = new TrackerRequestHandler(t);
-		handler.getTrackerResponse();
+		TrackerResponse res = handler.getTrackerResponse();
+		for(Peer peer:res.getPeerList()){
+			System.out.println(peer);
+		}
+
 
 	}
 }

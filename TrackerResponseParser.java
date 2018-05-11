@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -13,9 +14,9 @@ import java.net.UnknownHostException;
 public class TrackerResponseParser{
 
 	
-	public TrackerResponse parseTorrent(String filepath) throws IOException{
+	public TrackerResponse parseResponse(byte[] input) throws IOException{
 
-		BReader reader = new BReader(new File(filepath));
+		BReader reader = new BReader(input);
 		BElement[] out = reader.Decode();
 		if(out.length>1){
 			throw new Error("Response contains more than one object");
@@ -31,7 +32,7 @@ public class TrackerResponseParser{
 		response.setTrackerId(parseByteString("tracker id",dictionary));
 		response.setComplete(parseLong("complete",dictionary));
 		response.setIncomplete(parseLong("incomplete",dictionary));
-		//response.setPeerList(parsePeerList(dictionary));
+		response.setPeerList(parsePeerList(dictionary));
 		return response;
 	}
 
@@ -85,6 +86,8 @@ public class TrackerResponseParser{
 					byte[] curr = Arrays.copyOfRange(data, 6 * i, (6 * (i + 1)));
 					byte[] ip   = Arrays.copyOfRange(curr, 0, 4);
 					byte[] port = Arrays.copyOfRange(curr, 4, 6);
+					
+					
 					Peer peer = new Peer(port,ip);
 					peers.add(peer);
 

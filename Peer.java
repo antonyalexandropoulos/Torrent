@@ -17,6 +17,6 @@ public class Peer{
 
 	@Override
 	public String toString(){
-		return "( " +String.valueOf(port) +this.ip.toString() + " )";
+		return "( " +String.valueOf(port) +" : " +this.ip.toString() + " )";
 	}
 }
