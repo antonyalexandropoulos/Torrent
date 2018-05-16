@@ -35,7 +35,8 @@ public class TorrentParser{
 		
 		//Main dictionary
 	
-		torrent.setInfoHash(Utils.SHAsum(info.bencode()));
+		torrent.setInfoHash(Utils.byteInfoHash(info.bencode()));
+		torrent.setUrlInfoHash(Utils.SHAsum(info.bencode()));
 		torrent.setAnnounce(parseByteString("announce",dictionary));
 		torrent.setName(parseByteString("name",dictionary));
 		torrent.setCreatedBy(parseByteString("created by",dictionary));

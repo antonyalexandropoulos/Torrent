@@ -19,7 +19,7 @@ public class TrackerRequestHandler{
 	public TrackerRequest createRequest()throws UnsupportedEncodingException{
 		TrackerRequest request = new TrackerRequest();
 		request.setAnnounce(torrent.getAnnounce());
-		request.add("info_hash",new String(this.torrent.getInfoHash().getBytes(),"ISO-8859-1"));
+		request.add("info_hash",new String(this.torrent.getUrlInfoHash().getBytes(),"ISO-8859-1"));
 		request.add("peer_id",new String("-TO0042-0ab8e8a31019"));
 		//%f8%d0%2c%c3c%ca%da%93%12R%ec%bd%b2%91%b8%88l%1b%dd%c0
 		//f8d02cc363cada931252ecbdb291b8886c1bddc0

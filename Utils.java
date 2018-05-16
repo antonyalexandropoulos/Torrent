@@ -7,6 +7,20 @@ import java.io.*;
 import java.net.*;
 
 public class Utils{
+  public static byte[] byteInfoHash(byte[] input){
+    try
+    {
+      MessageDigest md=MessageDigest.getInstance("SHA-1");
+      return md.digest(input);
+    }
+    catch(NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+    return null;
+    
+  
+  }
 	public static String SHAsum(byte[] input)throws UnsupportedEncodingException
     {
         
@@ -47,26 +61,13 @@ public class Utils{
         Formatter formatter = new Formatter();
         for (byte b : bytes)
         { 
-           
-            
-            
-            //if(b=='.' || b=='-' || b=='_' || b=='~')
-            //System.out.println((char)b);
 
             if((b>='a'&& b<='z') || (b>='A'&& b<='Z') || (b>='0'&& b<='9') ||(b=='.' || b=='-' || b=='_' || b=='~'))
             {
-                  //System.out.println(b);
-                  //System.out.println((char)b);
       
-                  if(b=='0'){
-                    //System.out.println("-----");
-                    //System.out.println((char)b);
-                    //System.out.println(b);
-                    //System.out.println("-----");
-                  }
                   int temp = Integer.valueOf(Integer.toString(b), 10);
                  // System.out.println(temp);
-                   sb.append((char)b);
+                  sb.append((char)b);
                 
             }
             else{
@@ -74,8 +75,6 @@ public class Utils{
               sb.append("%");
               sb.append(String.format("%02x", b));
             }
-
-            
         }
         //System.out.println(String.format(formatter.toString(), 1));
         return sb.toString();

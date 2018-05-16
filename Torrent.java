@@ -4,7 +4,8 @@ import java.util.List;
 public class Torrent{
 	private  String announce;
 	private  String name;
-	private  String infoHash;
+	private  byte[] infoHash;
+  private  String urlInfoHash;
 	private  String comment;
 	private  String createdBy;
 	private  Long pieceLength;
@@ -56,9 +57,13 @@ public class Torrent{
   		this.announceList = announceList;
   	}
 
-  	public void setInfoHash(String infoHash){
+  	public void setInfoHash(byte[] infoHash){
   		this.infoHash = infoHash;
   	}
+
+    public void setUrlInfoHash(String urlInfoHash){
+      this.urlInfoHash = urlInfoHash;
+    }
 
   	public void setSingleFile(boolean singlefile){
   		this.singlefile = singlefile;
@@ -108,9 +113,13 @@ public class Torrent{
 		return this.creationDate;
 	}
 
-	public String getInfoHash(){
+	public byte[] getInfoHash(){
 		return this.infoHash;
 	}
+
+  public String getUrlInfoHash(){
+    return this.urlInfoHash;
+  }
 
 	public List<TorrentFile> getFileList(){
 		return this.fileList;
