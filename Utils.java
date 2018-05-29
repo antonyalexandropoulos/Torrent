@@ -90,14 +90,25 @@ public class Utils{
       }
       return new String(hexChars);
   }
+  public static byte[] IntToByte(int n,int len){
+      byte[] result = new byte[4];
+      int div = 8*(len-1);
+      for(int i=0;i<len;++i){
+          result[i] = (byte) (n>>div);
+          div-=8;
+      }
+      //result[0] = (byte) (i >> 24);
+      //result[1] = (byte) (i >> 16);
+      //result[2] = (byte) (i >> 8);
+      //result[3] = (byte) (i /*>> 0*/);
+      return result;
+  }
 
   public static  int bytesToInt(byte[] bytes){
       /*int bue = 0 ;
-
       for(int i=0;i<bytes.length;++i){
         bue = (bue<<8) | bytes[i];
       }
-  
       return bue;*/
       // return new BigInteger(bytes).intValue();
       return (bytes[0] & 0xFF) << 8 | (bytes[1] & 0xFF);
