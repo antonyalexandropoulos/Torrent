@@ -12,7 +12,7 @@ public class Messenger{
 		byte[] pstrlen = {(byte)19};
 		byte[] pstr    = "BitTorrent protocol".getBytes();
 		byte[] reserved = {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x00};
-
+		byte[] id = "-TO0042-0ab8e8a3101".getBytes();
 		byte[] msg = new byte[pstrlen.length+pstr.length+reserved.length+40];
 		int index  = 0;
 
@@ -20,7 +20,7 @@ public class Messenger{
 		for(byte b:pstr) msg[index++]= b;
 		for(byte b:reserved) msg[index++]= b;
 		for(byte b:infoHash) msg[index++]= b;	
-
+		for(byte b:id) msg[index++]= b;
 		return msg;
 	}
 
@@ -53,7 +53,7 @@ public class Messenger{
 		byte[] idx = Utils.IntToByte(index,4);
 		byte[] s   = Utils.IntToByte(begin,4);
 		byte[] l   = Utils.IntToByte(length,4);
-		byte [] msg = {(byte)0x00,(byte)0x00,(byte)0x01,(byte)0x03,(byte)0x06};
+		byte[] msg = {(byte)0x00,(byte)0x00,(byte)0x01,(byte)0x03,(byte)0x06};
 		byte[] res = new byte[17];
 		int current = 0 ;
 		for(byte b:msg)

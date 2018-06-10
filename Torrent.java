@@ -35,6 +35,7 @@ public class Torrent{
   	}
   	public void setPieces(List<String> pieces){
   		this.pieces = pieces;
+      System.out.println(this.pieces.size());
   	}
 
   	public void setPieceData(byte [] piecedata){

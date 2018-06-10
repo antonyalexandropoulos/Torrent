@@ -14,7 +14,13 @@ public class Peer{
 		this.port = Utils.bytesToInt(port);
 		this.ip = InetAddress.getByAddress(ip);
 	}
-
+	public Integer getPort(){
+		return this.port;
+	}
+	public InetAddress getIp(){
+		return this.ip;
+	}
+	
 	@Override
 	public String toString(){
 		return "( " +String.valueOf(port) +" : " +this.ip.toString() + " )";

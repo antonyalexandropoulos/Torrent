@@ -105,13 +105,17 @@ public class Utils{
   }
 
   public static  int bytesToInt(byte[] bytes){
-      /*int bue = 0 ;
+      
+      int res = 0;
+      int div = 8 * (bytes.length-1);
       for(int i=0;i<bytes.length;++i){
-        bue = (bue<<8) | bytes[i];
+        res = res | ((bytes[i]& 0xFF) <<div);
+        div-=8;
       }
-      return bue;*/
+      return res;
+      
       // return new BigInteger(bytes).intValue();
-      return (bytes[0] & 0xFF) << 8 | (bytes[1] & 0xFF);
+      //return (bytes[0] & 0xFF) << 8 | (bytes[1] & 0xFF);
       
   }
 
