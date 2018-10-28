@@ -11,7 +11,7 @@ public class Torrent{
 	private  Long pieceLength;
 	private  Long totalSize;
 	private  Long creationDate;
-	private  List<String> pieces;
+	private  List<Piece> pieces;
 	private  List<String> announceList;
 	private  List<TorrentFile> fileList;
 	private  byte[] piecedata;
@@ -33,7 +33,7 @@ public class Torrent{
   	public void setTotalSize(Long totalSize){
   		this.totalSize = totalSize;
   	}
-  	public void setPieces(List<String> pieces){
+  	public void setPieces(List<Piece> pieces){
   		this.pieces = pieces;
       System.out.println(this.pieces.size());
   	}
@@ -94,7 +94,7 @@ public class Torrent{
   	public List<String> getAnnounceList(){
   		return this.announceList;
   	}
-  	public List<String> getPieces(){
+  	public List<Piece> getPieces(){
   		return this.pieces;
   	}
 

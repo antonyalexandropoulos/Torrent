@@ -30,7 +30,7 @@ public class TorrentParser{
 		BDict dictionary = (BDict) out[0];
 		BDict info =(BDict) dictionary.find(new BString("info"));
 		Torrent torrent = new Torrent();
-		
+
 		//System.out.println(info.find(new BString("piece length")));
 		
 		//Main dictionary
@@ -49,7 +49,7 @@ public class TorrentParser{
 		torrent.setFileList(parseFileList(info));
         torrent.setPieces(parsePieceHashes(info));
 
-        torrent.setSingleFile(dictionary.find(new BString("length"))!=null);
+        torrent.setSingleFile(info.find(new BString("length"))!=null);
 
 		if(torrent.isSingleFile())
 			torrent.setTotalSize(parseLong("length",info));
@@ -103,20 +103,24 @@ public class TorrentParser{
 		return null;
 	}
 
-	private List<String> parsePieceHashes(BDict info){
+	private List<Piece> parsePieceHashes(BDict info){
 		BString query = (BString) info.find(new BString("pieces"));
 		if(query != null){
 			byte [] data = query.getData();
-			List <String>  hashes = new ArrayList<>();
+			List <Piece>  hashes = new ArrayList<>();
 			if(data.length%20!=0)
 				throw new Error("Piece data not a multiple of 20");
 			int hashcount = data.length / 20;
 			for(int currHash=0;currHash<hashcount;++currHash){
 				byte[] curr = Arrays.copyOfRange(data, 20 * currHash, (20 * (currHash + 1)));
 				String sha1 = Utils.bytesToHex(curr);
-				hashes.add(sha1);
+				Long pieceLength = parseLong("piece length",info);
+				Piece currPiece = new Piece(sha1,pieceLength,currHash,curr);
+				hashes.add(currPiece);
 			}
-
+			for(Piece h:hashes){
+				System.out.println(h);
+			}
 			return hashes;
 			
 		}
@@ -127,7 +131,7 @@ public class TorrentParser{
 
 	public static void main(String[] args)throws IOException{
 		TorrentParser test = new TorrentParser();
-		Torrent t = test.parseTorrent("test.torrent");
+		Torrent t = test.parseTorrent("Pup.Star.3.World.Tour.2018.WEBRip.x264-ION10-[rarbg.to].torrent");
 		System.out.println(t.getComment());
 		System.out.println(t.getCreationDate());
 		System.out.println(t.getCreatedBy());
@@ -136,6 +140,8 @@ public class TorrentParser{
 		
 		System.out.println(t.getFileList());
 		System.out.println(t.getInfoHash());
+		System.out.println(t.isSingleFile());
+		System.out.println(t.getPieces());
 
 	}
 }
