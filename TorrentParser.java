@@ -118,9 +118,7 @@ public class TorrentParser{
 				Piece currPiece = new Piece(sha1,pieceLength,currHash,curr);
 				hashes.add(currPiece);
 			}
-			for(Piece h:hashes){
-				System.out.println(h);
-			}
+			
 			return hashes;
 			
 		}
