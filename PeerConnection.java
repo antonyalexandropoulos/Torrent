@@ -1,14 +1,17 @@
 import java.net.*;
 import java.io.*;
 import java.util.List;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.TreeSet;
+import java.lang.IllegalArgumentException;
+import java.util.Iterator;
 
 class PeerConnection implements Runnable {
 
     private List<Piece> pieces;
     private Peer peer;
     private Torrent t;
-    private HashSet<Integer> peerAvailable;
+    private TreeSet<Integer> peerAvailability=new TreeSet<Integer>();
     private Boolean choked= true;
 
 
@@ -17,12 +20,16 @@ class PeerConnection implements Runnable {
         this.pieces = pieces;
         this.t = t;
     }
+    public synchronized void setPieceIndex(int index,int value){
+    	this.pieces.get(index).setPieceIndex(value);
+
+    }
     public synchronized void add(Integer piece){
-    	this.peerAvailable.add(piece);
+    	this.peerAvailability.add(piece);
 
     }
     public synchronized void get(Integer piece){
-    	this.peerAvailable.contains(piece);
+    	this.peerAvailability.contains(piece);
     }
     public synchronized void setChoked(Boolean choke){
     	this.choked = choke;
@@ -48,7 +55,12 @@ class PeerConnection implements Runnable {
 		return "";
 
 	}
-
+	public  void showAvailable(){
+		Iterator<Integer> i = this.peerAvailability.iterator(); 
+        while (i.hasNext()) 
+            System.out.println(i.next());
+        System.out.println(this.pieces.size());
+	}
     public void run(){
     	try
     	{
@@ -56,10 +68,10 @@ class PeerConnection implements Runnable {
 			Messenger m = new Messenger();
 			Socket sock = new Socket(peer.getIp(), peer.getPort());
 			Thread test = new Thread(new Send(peer,this.t,sock));
-			Thread test2 = new Thread(new Receive(peer,this.t,sock));
+			Thread test2 = new Thread(new Receive(peer,this.t,sock,this));
 			test.start();
 			System.out.println(test.getId());
-			//test2.start();
+			test2.start();
 		 	//System.out.println( handshake);
 
 		    //sock.close();
@@ -79,14 +91,66 @@ class Receive implements Runnable{
 	private Peer peer;
     private Torrent t;
     private Socket socket;
+    private PeerConnection connection;
 
-	Receive(Peer peer,Torrent t,Socket socket){
+	Receive(Peer peer,Torrent t,Socket socket,PeerConnection connection){
 		this.peer = peer;
 		this.t = t;
 		this.socket = socket;
+		this.connection= connection;
 
 	}
+	private void ProcessMessage(String message,byte[] data){
 
+		switch(message){
+
+			case "Bitfield":
+				this.ProcessBitfield(data);
+				break;
+			case "Have":
+				this.ProcessHave(data);
+				break;
+			case "Choke":
+				this.ProcessChoke(true);
+				break;
+			case "Unchoke":
+				this.ProcessChoke(false);
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid message: " + message);
+		}
+		
+	}
+	private void ProcessBitfield(byte[] data){
+		Integer pieceIndex=0;
+		for(int i=0;i<data.length;++i){
+			for(int j=7;j>=0;--j){
+				if((data[i] & (1<<j))==1){
+					this.connection.add(pieceIndex);
+				}
+				pieceIndex+=1;
+			}
+		}
+
+		this.connection.showAvailable();
+        
+
+	}
+	private void ProcessHave(byte[] data){
+		Integer pieceNumber = Utils.bytesToInt(data);
+		connection.add(pieceNumber);
+		
+	}
+
+	private void ProcessChoke(boolean choked){
+		this.connection.setChoked(choked);
+	}
+
+	
+
+	private void ProcessPiece(byte[] data){
+
+	}
 
 	public void run(){
 		try
@@ -107,7 +171,7 @@ class Receive implements Runnable{
 		    String currentMessage = "";
 		    int start = 0;
 		    byte[] buffer = new byte[8192]; // or 4096, or more
-		    byte [] currBlob;
+		   	List<Byte> blob = new ArrayList<Byte>();
 		    while ((count = bis.read(buffer,0,buffer.length)) > 0)
 		    {
 		    
@@ -126,7 +190,7 @@ class Receive implements Runnable{
 				    System.out.println(buffer[i+4]);
 		      		currlen = Utils.bytesToInt(prefix);
 		      		System.out.println(currlen);
-		      		currBlob = new byte[currlen];
+		      		
 		      		
 		      		System.out.println(currentMessage);
 		      		i+=3;
@@ -135,15 +199,21 @@ class Receive implements Runnable{
 		      		if(byteindex==0){
 		      			currentMessage = PeerConnection.MessageMap(buffer[i]);
 		      		}
+		      		else
+		      			blob.add(buffer[i]);
 		      		System.out.println(currentMessage);
 		      		//System.out.println(buffer[i]);
+		      		
 		      		byteindex++;
 		      		if(byteindex==currlen){
 		      			currlen = 0;
 		      			byteindex = 0;
+		      			ProcessMessage(currentMessage,Utils.byteUnwrap(blob));
 		      			currentMessage = "";
+		      			blob.clear();
 
 		      		}
+		      		
 		      		//currBlob[byteindex-1]= buffer[i];
 
 		      	}

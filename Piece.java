@@ -17,6 +17,10 @@ public class Piece{
 
 	}
 
+	public void  setPieceIndex(int index){
+		this.index = index;
+	}
+
 	public boolean verify(){
 		return true;
 	}

@@ -2,9 +2,11 @@
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
+import java.util.List;
 import java.math.BigInteger;
 import java.io.*;
 import java.net.*;
+
 
 public class Utils{
   public static byte[] byteInfoHash(byte[] input){
@@ -117,6 +119,13 @@ public class Utils{
       // return new BigInteger(bytes).intValue();
       //return (bytes[0] & 0xFF) << 8 | (bytes[1] & 0xFF);
       
+  }
+
+  public static byte[] byteUnwrap(List<Byte> bytes){
+      byte[] res = new byte[bytes.size()];
+      for(int i=0;i<bytes.size();++i)
+        res[i]= bytes.get(i).byteValue();
+      return res;
   }
 
   
