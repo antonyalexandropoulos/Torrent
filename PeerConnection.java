@@ -8,7 +8,7 @@ import java.util.Iterator;
 
 class PeerConnection implements Runnable {
 
-    private List<Piece> pieces;
+    public List<Piece> pieces;
     private Peer peer;
     private Torrent t;
     private TreeSet<Integer> peerAvailability=new TreeSet<Integer>();
@@ -28,8 +28,8 @@ class PeerConnection implements Runnable {
     	this.peerAvailability.add(piece);
 
     }
-    public synchronized void get(Integer piece){
-    	this.peerAvailability.contains(piece);
+    public synchronized boolean get(Integer piece){
+    	return this.peerAvailability.contains(piece);
     }
     public synchronized void setChoked(Boolean choke){
     	this.choked = choke;
@@ -67,7 +67,7 @@ class PeerConnection implements Runnable {
 			System.out.println(peer);
 			Messenger m = new Messenger();
 			Socket sock = new Socket(peer.getIp(), peer.getPort());
-			Thread test = new Thread(new Send(peer,this.t,sock));
+			Thread test = new Thread(new Send(peer,this.t,sock,this));
 			Thread test2 = new Thread(new Receive(peer,this.t,sock,this));
 			test.start();
 			System.out.println(test.getId());
@@ -132,7 +132,7 @@ class Receive implements Runnable{
 			}
 		}
 
-		this.connection.showAvailable();
+		//this.connection.showAvailable();
         
 
 	}
@@ -144,6 +144,7 @@ class Receive implements Runnable{
 
 	private void ProcessChoke(boolean choked){
 		this.connection.setChoked(choked);
+
 	}
 
 	
@@ -208,7 +209,13 @@ class Receive implements Runnable{
 		      		if(byteindex==currlen){
 		      			currlen = 0;
 		      			byteindex = 0;
+		      			if (currentMessage=="Unchoke"){
+		      				Messenger m = new Messenger();
+		      				OutputStream os = this.socket.getOutputStream();
+		      				
+		      			}
 		      			ProcessMessage(currentMessage,Utils.byteUnwrap(blob));
+		      			System.out.println(this.connection.isChoked());
 		      			currentMessage = "";
 		      			blob.clear();
 
@@ -249,12 +256,13 @@ class Send implements Runnable{
 	private Peer peer;
     private Torrent t;
     private Socket socket;
+    private PeerConnection connection;
 
-	Send(Peer peer,Torrent t,Socket socket){
+	Send(Peer peer,Torrent t,Socket socket,PeerConnection connection){
 		this.peer = peer;
 		this.t = t;
 		this.socket = socket;
-
+		this.connection=connection;
 	}
 
 	public void run(){
@@ -268,6 +276,25 @@ class Send implements Runnable{
 			OutputStream os = this.socket.getOutputStream();
 		    os.write(handshake, 0, handshake.length);
 		    os.flush();
+		    byte[] f = m.Interested();
+		    os.write(f, 0, f.length);
+		    os.flush();
+		    while(true){
+		    	if(this.connection.isChoked()==false){
+
+		    		for(Piece piece:this.connection.pieces){
+		    			if(this.connection.get(piece.getPieceNumber())){
+
+		    				byte [] request = m.Request(piece.getPieceNumber(),piece.getPieceIndex(),16384);
+		    				System.out.println(this.t.getPieceLength().intValue());
+		    				//for(byte b:request)System.out.println(b);
+		    				os.write(request, 0, request.length);
+		    				os.flush();
+		    				return;
+		    			}
+		    		}
+		    	}
+		    }
 		}
 		catch(Exception e)
 		{
@@ -275,7 +302,8 @@ class Send implements Runnable{
 		}
 		
 
-	 	System.out.println( new String(handshake));
+	 	
+
 
 	}
 }

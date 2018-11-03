@@ -89,7 +89,7 @@ public class TrackerRequestHandler{
 		for(Peer peer:res.getPeerList()){
 			Thread t1 = new Thread(new PeerConnection(peer,t.getPieces(),t));
 			t1.start();
-			break;
+			//break;
 		    
 		}
 
