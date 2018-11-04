@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 import java.lang.IllegalArgumentException;
 import java.util.Iterator;
+import java.util.Arrays;
 
 class PeerConnection implements Runnable {
 
@@ -13,7 +14,7 @@ class PeerConnection implements Runnable {
     private Torrent t;
     private TreeSet<Integer> peerAvailability=new TreeSet<Integer>();
     private Boolean choked= true;
-
+    public boolean requesting = false;
 
     PeerConnection(Peer peer,List<Piece> pieces,Torrent t) {
     	this.peer = peer;
@@ -34,7 +35,17 @@ class PeerConnection implements Runnable {
     public synchronized void setChoked(Boolean choke){
     	this.choked = choke;
     }
-
+    public synchronized void writePiece(Integer index,byte[] piece){
+    	Piece currentPiece = pieces.get(index);
+    	try{
+    		currentPiece.writeBytes(piece);
+    		System.out.println(Thread.currentThread().getId()+" "+ this.peer);
+    	}
+    	catch(IOException e){
+    		System.out.println(e+" writing piece failed");
+    	}
+    	
+    }
     public synchronized Boolean isChoked(){
     	return this.choked;
     }
@@ -116,6 +127,9 @@ class Receive implements Runnable{
 			case "Unchoke":
 				this.ProcessChoke(false);
 				break;
+			case "Piece":
+				this.ProcessPiece(data);
+				break;
 			default:
 				throw new IllegalArgumentException("Invalid message: " + message);
 		}
@@ -150,6 +164,14 @@ class Receive implements Runnable{
 	
 
 	private void ProcessPiece(byte[] data){
+		byte [] idx = {data[0],data[1],data[2],data[3]};
+		byte [] off= {data[4],data[5],data[6],data[7]}; 
+		Integer index = Utils.bytesToInt(idx);
+		Integer offset= Utils.bytesToInt(off);
+		byte[] piece = Arrays.copyOfRange(data, 8, data.length);
+		this.connection.writePiece(index,piece);
+		this.connection.requesting= false;
+
 
 	}
 
@@ -177,23 +199,24 @@ class Receive implements Runnable{
 		    {
 		    
 		      
-		      System.out.println(count);
+		     // System.out.println(count);
 		      for(int i=0;i<count;++i,++start){
 		      	if(start<68)continue;
 		      	if(currlen==0){
 		      		if(i+3>=count)
 		      			throw new Error("Invalid socket input");
 		      		byte [] prefix = {buffer[i],buffer[i+1],buffer[i+2],buffer[i+3]};
-		      		System.out.println(buffer[i]);
-				    System.out.println(buffer[i+1]);
-				    System.out.println(buffer[i+2]);
-				    System.out.println(buffer[i+3]);
-				    System.out.println(buffer[i+4]);
+		      		//System.out.println(buffer[i]);
+				    //System.out.println(buffer[i+1]);
+				    //System.out.println(buffer[i+2]);
+				    //System.out.println(buffer[i+3]);
+				    //System.out.println(buffer[i+4]);
 		      		currlen = Utils.bytesToInt(prefix);
-		      		System.out.println(currlen);
+		      		//System.out.println(currlen);
+		      		if (currlen==0)
+		      			this.connection.requesting=false;
 		      		
-		      		
-		      		System.out.println(currentMessage);
+		      		//System.out.println(currentMessage);
 		      		i+=3;
 		      	}
 		      	else{
@@ -202,7 +225,7 @@ class Receive implements Runnable{
 		      		}
 		      		else
 		      			blob.add(buffer[i]);
-		      		System.out.println(currentMessage);
+		      		//System.out.println(currentMessage);
 		      		//System.out.println(buffer[i]);
 		      		
 		      		byteindex++;
@@ -279,10 +302,16 @@ class Send implements Runnable{
 		    byte[] f = m.Interested();
 		    os.write(f, 0, f.length);
 		    os.flush();
+		    byte[] c= m.UnChoke();
+		    os.write(c, 0, c.length);
+		    os.flush();
+		    int requested=0;
 		    while(true){
-		    	if(this.connection.isChoked()==false){
-
+		    	if(this.connection.isChoked()==false && !this.connection.requesting ){
+		    		requested=0;
 		    		for(Piece piece:this.connection.pieces){
+		    			if(requested>1)break;
+		    			if(piece.isDownloading())continue;
 		    			if(this.connection.get(piece.getPieceNumber())){
 
 		    				byte [] request = m.Request(piece.getPieceNumber(),piece.getPieceIndex(),16384);
@@ -290,7 +319,10 @@ class Send implements Runnable{
 		    				//for(byte b:request)System.out.println(b);
 		    				os.write(request, 0, request.length);
 		    				os.flush();
-		    				return;
+		    				piece.setDownloading(true);
+		    				this.connection.requesting=true;
+		    				requested+=1;
+		    				
 		    			}
 		    		}
 		    	}

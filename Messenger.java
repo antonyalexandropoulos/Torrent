@@ -30,12 +30,12 @@ public class Messenger{
 	}
 	
 	public byte[] Choke(){
-		byte [] msg = {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x01,(byte)0x01};
+		byte [] msg = {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x01,(byte)0x00};
 		return msg;
 	}
 
 	public byte[] UnChoke(){
-		byte [] msg = {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x01,(byte)0x02};
+		byte [] msg = {(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x01,(byte)0x01};
 		return msg;
 	}
 

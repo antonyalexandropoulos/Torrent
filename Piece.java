@@ -10,7 +10,7 @@ public class Piece{
 	private Long pieceSize;
 	private boolean downloading = false;
 	private boolean done= false;
-
+	private int times=0;
 
 	public Piece(String hash,Long pieceSize,int number,byte[] hashBlob){
 		this.hash = hash;
@@ -20,23 +20,32 @@ public class Piece{
 		this.data = new ByteArrayOutputStream() ;
 
 	}
-	private void writeBytes(byte[] bytes) throws IOException{
+	public void writeBytes(byte[] bytes) throws IOException{
 		data.write(bytes);
 		this.index+= bytes.length;
-		if(this.index==pieceSize-1)
+		this.times+=1;
+		System.out.println("Succesfully wrote "+bytes.length+" bytes :piece index "+this.index+" "+this.number+" "+this.times);
+		if(this.index==pieceSize){
+			System.out.println("DONE"+this.number);
 			verify();
+		}
+		this.downloading=false;
+
 	}
 	public int getPieceNumber(){
 		return this.number;
 	}
-	public int getPieceIndex(){
+	public synchronized int getPieceIndex(){
 		return this.index;
 	}
 	public void  setPieceIndex(int index){
 		this.index = index;
 	}
-	public void setDownloading(boolean downloading){
+	public synchronized void setDownloading(boolean downloading){
 		this.downloading = downloading;
+	}
+	public synchronized boolean isDownloading(){
+		return this.downloading;
 	}
 	public void setDone(boolean done){
 		this.done = done;
