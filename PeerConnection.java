@@ -35,11 +35,12 @@ class PeerConnection implements Runnable {
     public synchronized void setChoked(Boolean choke){
     	this.choked = choke;
     }
-    public synchronized void writePiece(Integer index,byte[] piece){
+    public synchronized void writePiece(Integer index,Integer offset,byte[] piece){
     	Piece currentPiece = pieces.get(index);
+    	System.out.println(index);
     	try{
-    		currentPiece.writeBytes(piece);
-    		System.out.println(Thread.currentThread().getId()+" "+ this.peer);
+    		currentPiece.writeBytes(piece,offset);
+    		System.out.println(Thread.currentThread().getId()+" "+ this.peer+" "+currentPiece.isDone());
     	}
     	catch(IOException e){
     		System.out.println(e+" writing piece failed");
@@ -111,7 +112,7 @@ class Receive implements Runnable{
 		this.connection= connection;
 
 	}
-	private void ProcessMessage(String message,byte[] data){
+	private synchronized void ProcessMessage(String message,byte[] data){
 
 		switch(message){
 
@@ -169,7 +170,7 @@ class Receive implements Runnable{
 		Integer index = Utils.bytesToInt(idx);
 		Integer offset= Utils.bytesToInt(off);
 		byte[] piece = Arrays.copyOfRange(data, 8, data.length);
-		this.connection.writePiece(index,piece);
+		this.connection.writePiece(index,offset,piece);
 		this.connection.requesting= false;
 
 
@@ -238,7 +239,7 @@ class Receive implements Runnable{
 		      				
 		      			}
 		      			ProcessMessage(currentMessage,Utils.byteUnwrap(blob));
-		      			System.out.println(this.connection.isChoked());
+		      			//System.out.println(this.connection.isChoked());
 		      			currentMessage = "";
 		      			blob.clear();
 
@@ -310,16 +311,18 @@ class Send implements Runnable{
 		    	if(this.connection.isChoked()==false && !this.connection.requesting ){
 		    		requested=0;
 		    		for(Piece piece:this.connection.pieces){
-		    			if(requested>1)break;
-		    			if(piece.isDownloading())continue;
+		    			if(requested>0)break;
+		    			if(  this.connection.pieces.get(7).isDone())continue;
 		    			if(this.connection.get(piece.getPieceNumber())){
-
-		    				byte [] request = m.Request(piece.getPieceNumber(),piece.getPieceIndex(),16384);
-		    				System.out.println(this.t.getPieceLength().intValue());
+		  
+		    				byte [] request = m.Request(7,this.connection.pieces.get(7).getPieceIndex(),16384);
+		    				//System.out.println(this.t.getPieceLength().intValue());
+		    				System.out.println("requesting "+7+" "+ piece.isDownloading() );
 		    				//for(byte b:request)System.out.println(b);
 		    				os.write(request, 0, request.length);
 		    				os.flush();
 		    				piece.setDownloading(true);
+		    				System.out.println("ITS NOT FALSE: "+piece.isDownloading());
 		    				this.connection.requesting=true;
 		    				requested+=1;
 		    				
@@ -332,10 +335,6 @@ class Send implements Runnable{
 		{
 			System.out.println(e);
 		}
-		
-
-	 	
-
 
 	}
 }

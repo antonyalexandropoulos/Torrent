@@ -20,14 +20,21 @@ public class Piece{
 		this.data = new ByteArrayOutputStream() ;
 
 	}
-	public void writeBytes(byte[] bytes) throws IOException{
+	public synchronized void writeBytes(byte[] bytes,Integer offset) throws IOException{
+		
+		if(offset!=this.index){
+			//System.out.println("CRITICAL FAILURE ");
+			return;
+		}
 		data.write(bytes);
 		this.index+= bytes.length;
 		this.times+=1;
 		System.out.println("Succesfully wrote "+bytes.length+" bytes :piece index "+this.index+" "+this.number+" "+this.times);
 		if(this.index==pieceSize){
 			System.out.println("DONE"+this.number);
-			verify();
+
+			if(verify())
+				this.done=true;
 		}
 		this.downloading=false;
 
@@ -47,11 +54,37 @@ public class Piece{
 	public synchronized boolean isDownloading(){
 		return this.downloading;
 	}
+	public synchronized boolean isDone(){
+		return this.done;
+	}
 	public void setDone(boolean done){
 		this.done = done;
 	}
 	public boolean verify(){
 		System.out.println("verifying : "+this.number);
+		byte[] hash = Utils.byteInfoHash(this.data.toByteArray());
+		for(int i=0;i<hash.length;++i){
+			if(this.hashBlob[i]!=hash[i]){
+				System.out.println("VERIFICATION FAILED");
+				try{
+					System.out.println(this.hash+" vs "+Utils.SHAsum(this.data.toByteArray()));
+				}
+				catch(Exception e){
+					System.out.println("kapaa");
+				}
+				this.data.reset();
+				this.index = 0;
+				return false;
+			}
+				
+		}
+		try{
+			System.out.println("VERIFICATION SUCCESSFUL: "+ this.hash+" vs "+Utils.SHAsum(this.data.toByteArray()));
+
+		}
+		catch(Exception e){
+			System.out.println("kapaa");
+		}
 		return true;
 	}
 
