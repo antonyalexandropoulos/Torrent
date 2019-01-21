@@ -2,3 +2,4 @@
 *.torrent
 *.txt
 .DS_Store
+.gitignore

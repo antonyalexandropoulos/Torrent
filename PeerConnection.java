@@ -311,18 +311,19 @@ class Send implements Runnable{
 		    	if(this.connection.isChoked()==false && !this.connection.requesting ){
 		    		requested=0;
 		    		for(Piece piece:this.connection.pieces){
-		    			if(requested>0)break;
-		    			if(  this.connection.pieces.get(7).isDone())continue;
+		    			if(requested>2)break;
 		    			if(this.connection.get(piece.getPieceNumber())){
-		  
-		    				byte [] request = m.Request(7,this.connection.pieces.get(7).getPieceIndex(),16384);
+		    				piece.resetRequests();
+		    				if(  piece.isDone() || piece.isDownloading())continue;
+		  					piece.setDownloading(true);
+		  					piece.setTime();
+		    				byte [] request = m.Request(piece.getPieceNumber(),piece.getPieceIndex(),16384);
 		    				//System.out.println(this.t.getPieceLength().intValue());
-		    				System.out.println("requesting "+7+" "+ piece.isDownloading() );
+		    				System.out.println("requesting "+piece.getPieceNumber()+" "+ piece.getPieceSize() );
 		    				//for(byte b:request)System.out.println(b);
 		    				os.write(request, 0, request.length);
 		    				os.flush();
-		    				piece.setDownloading(true);
-		    				System.out.println("ITS NOT FALSE: "+piece.isDownloading());
+		    				
 		    				this.connection.requesting=true;
 		    				requested+=1;
 		    				

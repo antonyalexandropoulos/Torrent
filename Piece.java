@@ -1,5 +1,6 @@
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.FileOutputStream;
 
 public class Piece{
 	private String hash;
@@ -11,6 +12,7 @@ public class Piece{
 	private boolean downloading = false;
 	private boolean done= false;
 	private int times=0;
+	private long timeOfLastRequest=0;
 
 	public Piece(String hash,Long pieceSize,int number,byte[] hashBlob){
 		this.hash = hash;
@@ -23,7 +25,7 @@ public class Piece{
 	public synchronized void writeBytes(byte[] bytes,Integer offset) throws IOException{
 		
 		if(offset!=this.index){
-			//System.out.println("CRITICAL FAILURE ");
+			System.out.println("CRITICAL FAILURE ");
 			return;
 		}
 		data.write(bytes);
@@ -34,7 +36,14 @@ public class Piece{
 			System.out.println("DONE"+this.number);
 
 			if(verify())
+			{
 				this.done=true;
+				writeToFile();
+				FileOutputStream outputStream = new FileOutputStream(Integer.toString(this.number));
+				data.writeTo(outputStream);
+				data.reset();
+			}
+				
 		}
 		this.downloading=false;
 
@@ -45,12 +54,16 @@ public class Piece{
 	public synchronized int getPieceIndex(){
 		return this.index;
 	}
+	public Long getPieceSize(){
+		return this.pieceSize;
+	}
 	public void  setPieceIndex(int index){
 		this.index = index;
 	}
 	public synchronized void setDownloading(boolean downloading){
 		this.downloading = downloading;
 	}
+
 	public synchronized boolean isDownloading(){
 		return this.downloading;
 	}
@@ -60,6 +73,15 @@ public class Piece{
 	public void setDone(boolean done){
 		this.done = done;
 	}
+	public synchronized void setTime(){
+		this.timeOfLastRequest = System.currentTimeMillis();
+	}
+	public synchronized void resetRequests(){
+		if (this.timeOfLastRequest!=0 && (System.currentTimeMillis()-this.timeOfLastRequest>30000)){
+			this.downloading = false;
+		}
+	}
+
 	public boolean verify(){
 		System.out.println("verifying : "+this.number);
 		byte[] hash = Utils.byteInfoHash(this.data.toByteArray());
@@ -79,7 +101,8 @@ public class Piece{
 				
 		}
 		try{
-			System.out.println("VERIFICATION SUCCESSFUL: "+ this.hash+" vs "+Utils.SHAsum(this.data.toByteArray()));
+			System.out.println("VERIFICATION SUCCESSFUL: "+ Utils.byteArray2Hex(this.hashBlob)+" vs "+Utils.SHAsum(this.data.toByteArray()));
+			
 
 		}
 		catch(Exception e){
@@ -87,7 +110,9 @@ public class Piece{
 		}
 		return true;
 	}
+	private void writeToFile(){
 
+	}
 	@Override
     public String toString(){
     	StringBuilder sb = new StringBuilder();

@@ -56,7 +56,7 @@ public class Utils{
         return data;
     }
 
-     private static String byteArray2Hex(final byte[] bytes) throws UnsupportedEncodingException
+    public static String byteArray2Hex(final byte[] bytes) throws UnsupportedEncodingException
     {
         //System.out.println(URLEncoder.encode(new String(bytes),"UTF-8"));
         StringBuilder sb = new StringBuilder();

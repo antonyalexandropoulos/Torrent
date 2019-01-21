@@ -17,7 +17,7 @@ import java.nio.file.Path;
 
 public class TorrentParser{
 
-	
+	private long multiFileLength=0;
 	public Torrent parseTorrent(String filepath) throws IOException{
 		BReader reader = new BReader(new File(filepath));
 		
@@ -54,7 +54,7 @@ public class TorrentParser{
 		if(torrent.isSingleFile())
 			torrent.setTotalSize(parseLong("length",info));
 		else
-			torrent.setTotalSize(parseLong("total size",info));
+			torrent.setTotalSize(this.multiFileLength);
 
 		
 		return torrent;
@@ -87,6 +87,7 @@ public class TorrentParser{
 					BDict dict  = (BDict) fileObject;
 					BList filepaths = (BList) dict.find(new BString("path"));
 					BInt length = (BInt) dict.find(new BString("length"));
+					this.multiFileLength += length.getValue();
 					List<String> paths = new LinkedList<String>();
 					Iterator<BElement> filePathsIterator = filepaths.getIterator();
                     
@@ -115,6 +116,13 @@ public class TorrentParser{
 				byte[] curr = Arrays.copyOfRange(data, 20 * currHash, (20 * (currHash + 1)));
 				String sha1 = Utils.bytesToHex(curr);
 				Long pieceLength = parseLong("piece length",info);
+				if (currHash==hashcount-1){
+					if(parseLong("length",info)!=null)
+						pieceLength = parseLong("length",info) % pieceLength==0 ? pieceLength : parseLong("length",info) % pieceLength;
+					else
+						pieceLength = multiFileLength % pieceLength==0 ? pieceLength : multiFileLength % pieceLength;
+
+				}
 				Piece currPiece = new Piece(sha1,pieceLength,currHash,curr);
 				hashes.add(currPiece);
 			}
@@ -129,7 +137,7 @@ public class TorrentParser{
 
 	public static void main(String[] args)throws IOException{
 		TorrentParser test = new TorrentParser();
-		Torrent t = test.parseTorrent("Pup.Star.3.World.Tour.2018.WEBRip.x264-ION10-[rarbg.to].torrent");
+		Torrent t = test.parseTorrent("kubuntu-18.04-desktop-amd64.iso.torrent");
 		System.out.println(t.getComment());
 		System.out.println(t.getCreationDate());
 		System.out.println(t.getCreatedBy());
